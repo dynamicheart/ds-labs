@@ -27,10 +27,10 @@
 #include "rdt_sender.h"
 
 #define MAX_BUFFER_SIZE 15000
-#define MAX_WINDOW_SIZE 2
+#define MAX_WINDOW_SIZE 3
 #define TIMEOUT 0.2
 
-#define HEADER_SIZE 8
+#define HEADER_SIZE 7
 #define MAX_PAYLOAD_SIZE (RDT_PKTSIZE - HEADER_SIZE)
 
 static message* buffer;
@@ -70,7 +70,6 @@ static void fill_windows() {
     while (npacket < MAX_WINDOW_SIZE && cur_message_seq < next_message_seq) {
         if(msg.size - cursor_sender > MAX_PAYLOAD_SIZE){
             memcpy(pkt.data + sizeof(short), &next_packet_seq, sizeof(int));
-            pkt.data[sizeof(short) + sizeof(int)] = cur_message_seq % 256;
 
             pkt.data[HEADER_SIZE - 1] = MAX_PAYLOAD_SIZE;
 
@@ -86,7 +85,6 @@ static void fill_windows() {
             npacket++;
         } else if (msg.size > cursor_sender) {
             memcpy(pkt.data + sizeof(short), &next_packet_seq, sizeof(int));
-            pkt.data[sizeof(short) + sizeof(int)] = cur_message_seq % 256;
             pkt.data[HEADER_SIZE - 1] = msg.size - cursor_sender;
 
             memcpy(pkt.data + HEADER_SIZE, msg.data + cursor_sender, msg.size - cursor_sender);

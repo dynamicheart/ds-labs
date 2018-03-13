@@ -21,13 +21,11 @@
 #include "rdt_struct.h"
 #include "rdt_receiver.h"
 
-#define HEADER_SIZE 8
+#define HEADER_SIZE 7
 #define MAX_PAYLOAD_SIZE (RDT_PKTSIZE - HEADER_SIZE)
 
 //当前消息
 static message* cur_message;
-//消息序号
-static int message_expected;
 //当前message还未收到的数据的第一个byte的偏移量
 static int cursor_receiver;
 
@@ -55,7 +53,6 @@ void Receiver_Init()
 {
     cur_message = (message *)malloc(sizeof(message));
     memset(cur_message, 0, sizeof(message));
-    message_expected = -1;
     cursor_receiver = 0;
 
     packet_expected = 0;
@@ -81,7 +78,7 @@ void Receiver_FromLowerLayer(struct packet *pkt)
     memcpy(&sum, pkt->data, sizeof(short));
     if(sum != checksum(pkt)) return;
 
-    int packet_seq = 0, message_seq = 0, payload_size = 0;
+    int packet_seq = 0, payload_size = 0;
     memcpy(&packet_seq, pkt->data + sizeof(short), sizeof(int));
     if(packet_seq != packet_expected) {
         send_ack(packet_expected - 1);
@@ -89,19 +86,13 @@ void Receiver_FromLowerLayer(struct packet *pkt)
     }
 
     packet_expected++;
-    message_seq = pkt->data[sizeof(short) + sizeof(int)];
-    if(message_expected != message_seq) {
-        if(cur_message->size != 0) free(cur_message->data);
-        memcpy(&cur_message->size, pkt->data + HEADER_SIZE, sizeof(int));
-        cur_message->data = (char*) malloc(cur_message->size);
-        cursor_receiver = 0;
-        message_expected = message_seq;
-    }
-
     payload_size = pkt->data[HEADER_SIZE - 1];
 
     //第一个包
     if(cursor_receiver == 0){
+        if(cur_message->size != 0) free(cur_message->data);
+        memcpy(&cur_message->size, pkt->data + HEADER_SIZE, sizeof(int));
+        cur_message->data = (char*) malloc(cur_message->size);
         memcpy(cur_message->data, pkt->data + HEADER_SIZE + sizeof(int), payload_size - sizeof(int));
         cursor_receiver += payload_size - sizeof(int);
     } else {
@@ -111,6 +102,7 @@ void Receiver_FromLowerLayer(struct packet *pkt)
 
     if(cur_message->size == cursor_receiver) {
         Receiver_ToUpperLayer(cur_message);
+        cursor_receiver = 0;
     }
 
     send_ack(packet_seq);
