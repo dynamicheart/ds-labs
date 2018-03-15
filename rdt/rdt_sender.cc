@@ -27,8 +27,8 @@
 #include "rdt_sender.h"
 
 #define MAX_BUFFER_SIZE 15000
-#define MAX_WINDOW_SIZE 3
-#define TIMEOUT 0.2
+#define MAX_WINDOW_SIZE 10
+#define TIMEOUT 0.3
 
 #define HEADER_SIZE 7
 #define MAX_PAYLOAD_SIZE (RDT_PKTSIZE - HEADER_SIZE)
