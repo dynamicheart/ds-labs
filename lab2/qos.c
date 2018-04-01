@@ -7,6 +7,9 @@
 
 #include "qos.h"
 
+// We need fraction
+#define NSEC_PER_SEC 1000000000.0
+
 /**
  * srTCM
  */
@@ -25,23 +28,26 @@
  *     - 单位 Byte
  */
 
-// 1. 虚拟机CPU的hz为3,095,221,586
+// 1. 测量虚拟机CPU的频率, 比如虚拟机CPU的hz为3,095,221,586, 在meter的时候要将ns转换为cpu的cycle数
 // 2. cir_period指的是每隔多少个cycles填充一次令牌桶,CIR bytes per period 指的是每个period填充多少个bytes
-// 3. 通过计算main中发包速率,得出每隔1,000,000个cycles,平均每一个流要发(1000/4)Packets * 640 Bytes = 160,000,
-//    即每秒每个包要发送495,235,453.76Bytes
-// 4. 对于FLOW 0,要让其获得最大带宽,则其可能的最大发包速率为(128+1024)*1500 = 1,728,000 Byte,cbs 和 ebs应该设得尽可能大,使其获得绿包。
+// 3. 通过计算main中发包速率,得出每隔1,000,000ns,平均每一个流要发(1000/4)Packets * 640 Bytes = 160,000,
+//    即每秒每个流要发送160,000,000Bytes
+// 4. 对于FLOW 0,要让其获得最大带宽,则其可能的最大发包速率为(128+1024)*1500*1000 = 1,728,000,000 Byte,cbs和ebs
+//    应该设得尽可能大,使其获得绿包。
 // 5. 对于FLOW 1，其cir应为FLOW 0的一半,其它流同理
 static struct rte_meter_srtcm_params app_srtcm_params[APP_FLOWS_MAX] = {
-     {.cir = 498235435,  .cbs = 10000 * 36, .ebs = 10000 * 48}, // Flow 0
-     {.cir = 249117717, .cbs = 10000 * 7, .ebs = 10000 * 36}, // Flow 1
-     {.cir = 124558858, .cbs = 1000 * 32, .ebs = 10000 * 20}, // Flow 2
-     {.cir = 62279429, .cbs = 1000 * 16, .ebs = 10000 * 16} // Flow 3
+     {.cir = 160000000, .cbs = 10000 * 40, .ebs = 10000 * 48}, // Flow 0
+     {.cir =  80000000, .cbs = 10000 *  7, .ebs = 10000 * 36}, // Flow 1
+     {.cir =  40000000, .cbs =  1000 * 32, .ebs = 10000 * 20}, // Flow 2
+     {.cir =  20000000, .cbs =  1000 * 16, .ebs = 10000 * 16} // Flow 3
  };
 
 static struct rte_meter_srtcm app_flows[APP_FLOWS_MAX];
 
-// 
+// The time passed to rte_meter should be counted from rte_meter config
 static uint64_t start_times[APP_FLOWS_MAX];
+
+static uint64_t cpu_hz;
 
 int
 qos_meter_init(void)
@@ -51,7 +57,8 @@ qos_meter_init(void)
     int ret;
 
     // Log the hz of current cpu
-    printf("QoS Menter: hz = %lu\n", rte_get_tsc_hz());
+    cpu_hz = rte_get_tsc_hz();
+    printf("QoS Meter: hz = %lu\n", cpu_hz);
 
     for (i = 0; i < APP_FLOWS_MAX; i++) {
         ret = rte_meter_srtcm_config(&app_flows[i], &app_srtcm_params[i]);
@@ -67,7 +74,9 @@ qos_meter_init(void)
 enum qos_color
 qos_meter_run(uint32_t flow_id, uint32_t pkt_len, uint64_t time)
 {
-    return (enum qos_color)rte_meter_srtcm_color_blind_check(&app_flows[flow_id], start_times[flow_id] + time, pkt_len);
+    // 1. We need to convert ns to cpu circles
+    // 2. Time is not counted from 0
+    return (enum qos_color)rte_meter_srtcm_color_blind_check(&app_flows[flow_id], start_times[flow_id] + (uint64_t)(time / NSEC_PER_SEC * cpu_hz), pkt_len);
 }
 
 
@@ -90,23 +99,23 @@ qos_meter_run(uint32_t flow_id, uint32_t pkt_len, uint64_t time)
 static struct rte_red_params app_red_params[APP_FLOWS_MAX][e_RTE_METER_COLORS] = {
     { // Flow 0
         {.min_th = 1022, .max_th = 1023, .maxp_inv = 255, .wq_log2 = 9}, // Green
-        {.min_th = 1022, .max_th = 1023, .maxp_inv = 255, .wq_log2 = 9}, // Yellow
-        {.min_th = 1022, .max_th = 1023, .maxp_inv = 255, .wq_log2 = 9}  // Red
+        {.min_th = 16, .max_th = 32, .maxp_inv = 5, .wq_log2 = 9}, // Yellow
+        {.min_th = 1, .max_th = 16, .maxp_inv = 1, .wq_log2 = 9}  // Red
     },
     { // Flow 1
         {.min_th = 64, .max_th = 1023, .maxp_inv = 10, .wq_log2 = 9}, // Green
-        {.min_th = 16, .max_th = 32, .maxp_inv = 10, .wq_log2 = 9}, // Yellow
-        {.min_th = 1, .max_th = 16, .maxp_inv = 10, .wq_log2 = 9}  // Red
+        {.min_th = 16, .max_th = 32, .maxp_inv = 3, .wq_log2 = 9}, // Yellow
+        {.min_th = 1, .max_th = 16, .maxp_inv = 1, .wq_log2 = 9}  // Red
     },
     { // Flow 2
         {.min_th = 64, .max_th = 1023, .maxp_inv = 10, .wq_log2 = 9}, // Green
-        {.min_th = 4, .max_th = 16, .maxp_inv = 6, .wq_log2 = 9}, // Yellow
-        {.min_th = 1, .max_th = 8, .maxp_inv = 3, .wq_log2 = 9}  // Red
+        {.min_th = 4, .max_th = 16, .maxp_inv = 2, .wq_log2 = 9}, // Yellow
+        {.min_th = 1, .max_th = 8, .maxp_inv = 1, .wq_log2 = 9}  // Red
     },
     { // Flow 3
         {.min_th = 64, .max_th = 1023, .maxp_inv = 10, .wq_log2 = 9}, // Green
         {.min_th = 2, .max_th = 6, .maxp_inv = 3, .wq_log2 = 9}, // Yellow
-        {.min_th = 1, .max_th = 3, .maxp_inv = 2, .wq_log2 = 9}  // Red
+        {.min_th = 1, .max_th = 3, .maxp_inv = 1, .wq_log2 = 9}  // Red
     }
 };
 
@@ -164,7 +173,9 @@ qos_dropper_run(uint32_t flow_id, enum qos_color color, uint64_t time)
         last_burst_time = time;
     }
 
-    if (rte_red_enqueue(&app_red_configs[flow_id][color], &app_reds[flow_id][color], queues[flow_id], start_times[flow_id] + time) == 0) {
+    // Actually the timestamp should be measured in bytes, however we could not get the timestamp in bytes in such an interface.
+    // So just pass cpu circles as timestamp
+    if (rte_red_enqueue(&app_red_configs[flow_id][color], &app_reds[flow_id][color], queues[flow_id], start_times[flow_id] + (uint64_t)(time / NSEC_PER_SEC * cpu_hz)) == 0) {
         queues[flow_id]++;
         return 0;
     }
