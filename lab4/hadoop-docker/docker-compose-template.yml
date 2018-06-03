@@ -1,0 +1,50 @@
+version: '2'
+
+services:
+  hadoopbase:
+    build: ./hadoop-base
+    image: dynamicheart/hadoop-base:1.0.0-hadoop2.7.6-java8
+    container_name: hadoopbase
+  hadoopmaster:
+    build: ./hadoop-master
+    image: dynamicheart/hadoop-master:1.0.0-hadoop2.7.6-java8
+    container_name: hadoopmaster
+    environment:
+      - CLUSTER_NAME=test
+    depends_on:
+      - hadoopbase
+      - hadoopslave1
+      - hadoopslave2
+    volumes:
+      - hadoopmaster_name:/hadoop/dfs/name
+      - /your/local/workstation/dir:/home/workstation
+    stdin_open: true
+    tty: true
+  hadoopslave1:
+    build: ./hadoop-slave
+    image: dynamicheart/hadoop-slave:1.0.0-hadoop2.7.6-java8
+    container_name: hadoopslave1
+    stdin_open: true
+    tty: true
+    depends_on:
+      - hadoopbase
+    volumes:
+      - hadoopslave2_data:/hadoop/dfs/data
+    stdin_open: true
+    tty: true
+  hadoopslave2:
+    build: ./hadoop-slave
+    image: dynamicheart/hadoop-slave:1.0.0-hadoop2.7.6-java8
+    container_name: hadoopslave2
+    depends_on:
+      - hadoopbase
+    volumes:
+      - hadoopslave2_data:/hadoop/dfs/data
+    stdin_open: true
+    tty: true
+
+volumes:
+  hadoopmaster_name:
+  hadoopslave1_data:
+  hadoopslave2_data:
+
