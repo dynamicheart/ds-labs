@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+mainClassName = 'DValueSumApp'
+
+jar {
+    baseName = 'DValueSumApp'
+}
+
+dependencies {
+    final HADOOP_VERSION = '2.7.6'
+    compile "org.apache.hadoop:hadoop-common:$HADOOP_VERSION"
+    compile "org.apache.hadoop:hadoop-mapreduce-client-app:$HADOOP_VERSION"
+
+    testCompile 'junit:junit:4.12'
+}
+
+repositories {
+    jcenter()
+}
+
