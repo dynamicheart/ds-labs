@@ -3,7 +3,7 @@ where id = did and did > 0 and did < 1000 and date is null
 group by type order by type desc;
 
 select date, type, avg(value) from device left join dvalues on id = did
-where did > 0 and did < 10 and date id not null
+where did > 0 and did < 10 and date is not null
 group by date, type order by date desc, type;
 
 select * from device into outfile '/var/lib/mysql-files/device.txt'
