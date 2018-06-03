@@ -69,13 +69,13 @@ public class DValueSumApp {
     }
 
     public static class JoinReducer
-            extends Reducer<IntWritable, Text, Text, DoubleWritable> {
+            extends Reducer<IntWritable, Text, Text, Text> {
         private String[] fields;
         private List<String[]> deviceFieldsList = new ArrayList<>();
         private List<String[]> dValuesFieldsList = new ArrayList<>();
 
         private Text outputKey = new Text();
-        private DoubleWritable outputValue = new DoubleWritable();
+        private Text outputValue = new Text();
 
         @Override
         protected void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
@@ -94,7 +94,7 @@ public class DValueSumApp {
             for (String[] deviceFields: deviceFieldsList) {
                 for(String[] dValuesFields: dValuesFieldsList) {
                     outputKey.set(deviceFields[1]);
-                    outputValue.set(Double.valueOf(dValuesFields[1]));
+                    outputValue.set(dValuesFields[1]);
                     context.write(outputKey, outputValue);
                 }
             }
@@ -168,7 +168,7 @@ public class DValueSumApp {
         joinJob.setMapOutputValueClass(Text.class);
         joinJob.setReducerClass(JoinReducer.class);
         joinJob.setOutputKeyClass(Text.class);
-        joinJob.setOutputValueClass(DoubleWritable.class);
+        joinJob.setOutputValueClass(Text.class);
         FileOutputFormat.setOutputPath(joinJob, new Path(TEMP_FILE_PATH));
         if (!joinJob.waitForCompletion(true)) {
             getHDFS(conf).delete(new Path(TEMP_FILE_PATH), true);
