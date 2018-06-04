@@ -15,6 +15,7 @@ services:
       - hadoopbase
       - hadoopslave1
       - hadoopslave2
+      - hadoopslave3
     volumes:
       - hadoopmaster_name:/hadoop/dfs/name
     stdin_open: true
@@ -41,9 +42,19 @@ services:
       - hadoopslave2_data:/hadoop/dfs/data
     stdin_open: true
     tty: true
+  hadoopslave3:
+    build: ./hadoop-slave
+    image: dynamicheart/hadoop-slave:1.0.0-hadoop2.7.6-java8
+    container_name: hadoopslave3
+    depends_on:
+      - hadoopbase
+    volumes:
+      - hadoopslave3_data:/hadoop/dfs/data
+    stdin_open: true
+    tty: true
 
 volumes:
   hadoopmaster_name:
   hadoopslave1_data:
   hadoopslave2_data:
-
+  hadoopslave3_data:
