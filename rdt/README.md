@@ -2,11 +2,10 @@
 
 ### 设计策略
 - **主要策略**
-使用了go-back-n的方式，经测试，windows size设置为4，而time out设置为0.2，所用时间相对最少，发送包的数量相对最少。但有可能是因为退化成了stop-and-wait，因此还是讲windows size设置为10， timeout设置为0.3，来保证吞吐量。
+  - 使用了go-back-n的方式，经测试，windows size设置为4，而time out设置为0.2，所用时间相对最少，发送包的数量相对最少。但有可能是因为退化成了stop-and-wait，因此还是讲windows size设置为10， timeout设置为0.3，来保证吞吐量。
 
 - **对于GO-BACK-N方法的优化**
-
-在接收方中设置一个等于WINDOWS_SIZE的缓存,用于存放发送方超前发出的包，这样大大降低了总耗时。
+  - 在接收方中设置一个等于WINDOWS_SIZE的缓存,用于存放发送方超前发出的包，这样大大降低了总耗时。
 
 - **发包以及收包机制** 使用GO-BACK-N的方法。
   - 发送方每次收到从上层来的message，将message放入缓存。再检测timer有没有设置，如果没有设置，则说明当前windows为0，设置timer，此时填充windows，并且发包。
@@ -14,29 +13,31 @@
   - 发送方在timeout之后没有收到相应的ack，则将windows中的所有包全部发送，并重新设置timer。
   - 接收方按顺序接收包，按顺序发送ack，比 expcted < packet < expcted + windows_size 的包可以放入缓存中。
 
--  **包的设计**
+- **包的设计**
+  - 由发送方发往接收方的包的格式如表1所示,包头的大小为7个byte
+  - 其中对每条新的message，发送方发往接收方的第一个包的格式如表2所示，多了4个byte来记录新的message的大小，好让接收方知道该为这个新的message分配多少空间。
+  - 由接收方发往发送方的包的格式如表3所示，主要用来传递ack信息。
 
-由发送方发往接收方的包的格式如下,包头的大小为7个byte
-
-|checksum|packet seq|payload size|payload|
-|-|-|-|-|
-|2 byte|4 byte|1 byte|The rest|
-
-其中对每条新的message，发送方发往接收方的第一个包的格式如下，多了4个byte来记录新的message的大小，好让接收方知道该为这个新的message分配多少空间。
+表1：
 
 |checksum|packet seq|payload size|message size |payload|
 |-|-|-|-|-|
 |2 byte|4 byte|1 byte|4 byte|The rest|
 
-由接收方发往发送方的包的格式如下，主要用来传递ack信息。
+表2：
+
+|checksum|packet seq|payload size|payload|
+|-|-|-|-|
+|2 byte|4 byte|1 byte|The rest|
+
+表3：
 
 |checksum|ack|nothing|
 |-|-|-|
 |2 byte|4 byte|the rest|
 
 - **checksum校验算法**
-
-使用16-bit因特网checksum的算法
+  - 使用16-bit因特网checksum的算法
 ```c
 static short checksum(struct packet* pkt) {
     unsigned long sum = 0;
@@ -56,7 +57,7 @@ static short checksum(struct packet* pkt) {
 
 
 ### 测试
-相关测试结果如下，吞吐量正常，总耗时相对于参考值来说大大降低（这是由于在接收端设置buffer的原因）。
+- 相关测试结果如下，吞吐量正常，总耗时相对于参考值来说大大降低（这是由于在接收端设置buffer的原因）。
 
 ```shell
 >./rdt_sim 1000 0.1 100 0.15 0.15 0.15 0
