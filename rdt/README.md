@@ -19,7 +19,7 @@
 由发送方发往接收方的包的格式如下,包头的大小为7个byte
 
 |checksum|packet seq|payload size|payload|
-|-|-|-|-|-|
+|-|-|-|-|
 |2 byte|4 byte|1 byte|The rest|
 
 其中对每条新的message，发送方发往接收方的第一个包的格式如下，多了4个byte来记录新的message的大小，好让接收方知道该为这个新的message分配多少空间。
