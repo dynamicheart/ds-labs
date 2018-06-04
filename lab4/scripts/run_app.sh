@@ -28,7 +28,7 @@ else
 fi
 
 echo -e "\033[34m[Hadoop APP Controller]\033[0m: Running dvalue sum app"
-hadoop jar $APP_PATH/dvaluesum/build/libs/DValueSumApp.jar DValueSumApp /device.txt /dvalues.txt /out/dvaluesum
+time hadoop jar $APP_PATH/dvaluesum/build/libs/DValueSumApp.jar DValueSumApp /device.txt /dvalues.txt /out/dvaluesum
 checkError
 
 echo -e "\033[34m[Hadoop APP Controller]\033[0m: Dvalue sum app ends successfully"
@@ -37,7 +37,7 @@ hdfs dfs -cat /out/dvaluesum/part-r-00000
 checkError
 
 echo -e "\033[34m[Hadoop APP Controller]\033[0m: Running dvalue avg app"
-hadoop jar $APP_PATH/dvalueavg/build/libs/DValueAvgApp.jar DValueAvgApp /device.txt /dvalues.txt /out/dvalueavg
+time hadoop jar $APP_PATH/dvalueavg/build/libs/DValueAvgApp.jar DValueAvgApp /device.txt /dvalues.txt /out/dvalueavg
 checkError
 
 echo -e "\033[34m[Hadoop APP Controller]\033[0m: Dvalue avg app ends successfully"
