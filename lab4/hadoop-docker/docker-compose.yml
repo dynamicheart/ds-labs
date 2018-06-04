@@ -29,7 +29,7 @@ services:
     depends_on:
       - hadoopbase
     volumes:
-      - hadoopslave2_data:/hadoop/dfs/data
+      - hadoopslave1_data:/hadoop/dfs/data
     stdin_open: true
     tty: true
   hadoopslave2:
