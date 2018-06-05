@@ -5,10 +5,12 @@ MAINTAINER Jianbang Yang <yangjianbang112@gmail.com>
 COPY etc/hadoop/* $HADOOP_CONF_DIR/
 
 RUN mkdir -p /hadoop/dfs/data
+VOLUME /hadoop/dfs/data
 
 ADD run.sh /run.sh
 RUN chmod a+x /run.sh
 
+EXPOSE 50075
 EXPOSE 8042
 
 ENTRYPOINT service ssh restart && ./run.sh && bash

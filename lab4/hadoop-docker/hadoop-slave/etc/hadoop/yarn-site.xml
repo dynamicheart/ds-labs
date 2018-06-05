@@ -19,6 +19,36 @@
         <name>yarn.resourcemanager.hostname</name>
         <value>hadoopmaster</value>
     </property>
+<!-- See https://www.jianshu.com/p/e73e6ba60668 -->
+    <property>
+      <name>yarn.log-aggregation-enable</name>
+      <value>true</value>
+    </property>
+    <property>
+      <name>yarn.nodemanager.remote-app-log-dir</name>
+      <value>app-logs</value>
+    </property>
+
+<!-- See http://www.aboutyun.com/thread-16690-1-1.html -->
+    <property>
+      <name>yarn.timeline-service.enabled</name>
+      <value>true</value>
+    </property>
+    <property>
+      <name>yarn.timeline-service.generic-application-history.enabled</name>
+      <value>true</value>
+    </property>
+    <property>
+      <name>yarn.resourcemanager.system-metrics-publisher.enabled</name>
+      <value>true</value>
+    </property>
+    <property>
+      <name>yarn.timeline-service.hostname</name>
+      <value>hadoopmaster</value>
+    </property>
+
+
+
     <property>
         <name>yarn.nodemanager.aux-services</name>
         <value>mapreduce_shuffle</value>
@@ -27,9 +57,6 @@
         <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
         <value>org.apache.hadoop.mapred.ShuffleHandler</value>
     </property>
-    <property>
-      <name>yarn.log-aggregation-enable</name>
-      <value>true</value>
-    </property>
+    
 
 </configuration>

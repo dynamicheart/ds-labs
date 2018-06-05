@@ -11,6 +11,8 @@ services:
     container_name: hadoopmaster
     environment:
       - CLUSTER_NAME=test
+      - APP_PATH=/home/workstation/app
+      - DATA_PATH=/home/workstation/data
     depends_on:
       - hadoopbase
       - hadoopslave1
@@ -18,7 +20,11 @@ services:
       - hadoopslave3
     volumes:
       - hadoopmaster_name:/hadoop/dfs/name
+      - hadoopmaster_timeline:/hadoop/yarn/timeline
+      - /home/jianbang/lab4:/home/workstation
     ports:
+      - 8188:8188
+      - 19888:19888
       - 8088:8088
     stdin_open: true
     tty: true
@@ -32,8 +38,6 @@ services:
       - hadoopbase
     volumes:
       - hadoopslave1_data:/hadoop/dfs/data
-    ports:
-      - 8040:8042
     stdin_open: true
     tty: true
   hadoopslave2:
@@ -44,8 +48,6 @@ services:
       - hadoopbase
     volumes:
       - hadoopslave2_data:/hadoop/dfs/data
-    ports:
-      - 8041:8042
     stdin_open: true
     tty: true
   hadoopslave3:
@@ -56,13 +58,12 @@ services:
       - hadoopbase
     volumes:
       - hadoopslave3_data:/hadoop/dfs/data
-    ports:
-      - 8042:8042
     stdin_open: true
     tty: true
 
 volumes:
   hadoopmaster_name:
+  hadoopmaster_timeline:
   hadoopslave1_data:
   hadoopslave2_data:
   hadoopslave3_data:

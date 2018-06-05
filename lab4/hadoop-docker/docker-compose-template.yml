@@ -20,9 +20,8 @@ services:
       - hadoopslave3
     volumes:
       - hadoopmaster_name:/hadoop/dfs/name
+      - hadoopmaster_timeline:/hadoop/yarn/timeline
       - /your/local/workstation/dir:/home/workstation
-    ports:
-      - 8088:8088
     stdin_open: true
     tty: true
   hadoopslave1:
@@ -35,8 +34,6 @@ services:
       - hadoopbase
     volumes:
       - hadoopslave1_data:/hadoop/dfs/data
-    ports:
-      - 8040:8042
     stdin_open: true
     tty: true
   hadoopslave2:
@@ -59,13 +56,12 @@ services:
       - hadoopbase
     volumes:
       - hadoopslave3_data:/hadoop/dfs/data
-    ports:
-      - 8042:8042
     stdin_open: true
     tty: true
 
 volumes:
   hadoopmaster_name:
+  hadoopmaster_timeline:
   hadoopslave1_data:
   hadoopslave2_data:
   hadoopslave3_data:

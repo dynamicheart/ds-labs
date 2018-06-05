@@ -30,3 +30,5 @@ RUN apt-get update && apt-get install -y openssh-server \
     && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys \
     && touch ~/.ssh/config
 ADD etc/ssh/config /root/.ssh/config
+
+ENV USER root

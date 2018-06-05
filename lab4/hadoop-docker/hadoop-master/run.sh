@@ -11,3 +11,5 @@ fi
 
 $HADOOP_PREFIX/sbin/start-dfs.sh
 $HADOOP_PREFIX/sbin/start-yarn.sh
+$HADOOP_PREFIX/sbin/yarn-daemon.sh start timelineserver
+$HADOOP_PREFIX/sbin/mr-jobhistory-daemon.sh start historyserver
