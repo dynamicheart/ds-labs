@@ -13,46 +13,44 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 <configuration>
-
-<!-- Site specific YARN configuration properties -->
     <property>
         <name>yarn.resourcemanager.hostname</name>
         <value>hadoopmaster</value>
     </property>
-<!-- See https://www.jianshu.com/p/e73e6ba60668 -->
     <property>
-      <name>yarn.log-aggregation-enable</name>
-      <value>true</value>
+        <name>yarn.log-aggregation-enable</name>
+        <value>true</value>
     </property>
     <property>
-      <name>yarn.nodemanager.remote-app-log-dir</name>
-      <value>app-logs</value>
+        <name>yarn.nodemanager.remote-app-log-dir</name>
+        <value>app-logs</value>
+    </property>
+    <property>
+        <name>yarn.log.server.url</name>
+        <value>http://hadoopmaster:8188/applicationhistory/logs/</value>
+    </property>
+
+    <property>
+        <name>yarn.timeline-service.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.generic-application-history.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.system-metrics-publisher.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.hostname</name>
+        <value>hadoopmaster</value>
     </property>
 
 
-<!-- See http://www.aboutyun.com/thread-16690-1-1.html -->
     <property>
-      <name>yarn.timeline-service.enabled</name>
-      <value>true</value>
-    </property>
-    <property>
-      <name>yarn.timeline-service.generic-application-history.enabled</name>
-      <value>true</value>
-    </property>
-    <property>
-      <name>yarn.resourcemanager.system-metrics-publisher.enabled</name>
-      <value>true</value>
-    </property>
-    <property>
-      <name>yarn.timeline-service.hostname</name>
-      <value>hadoopmaster</value>
-    </property>
-
-
-
-    <property>
-      <name>yarn.timeline-service.leveldb-timeline-store.path</name>
-      <value>/hadoop/yarn/timeline</value>
+        <name>yarn.timeline-service.leveldb-timeline-store.path</name>
+        <value>/hadoop/yarn/timeline</value>
     </property>
 
 </configuration>

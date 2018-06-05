@@ -17,18 +17,17 @@
 <!-- Put site-specific property overrides in this file. -->
 
 <configuration>
-
     <property>
         <name>mapreduce.framework.name</name>
         <value>yarn</value>
     </property>
     <property>
-      <name>mapreduce.jobhistory.address</name>
-      <value>hadoopmaster:10020</value>
+        <name>mapreduce.jobhistory.address</name>
+        <value>hadoopmaster:10020</value>
     </property>
     <property>
-      <name>mapreduce.jobhistory.webapp.address</name>
-      <value>hadoopmaster:19888</value>
+        <name>mapreduce.jobhistory.webapp.address</name>
+        <value>hadoopmaster:19888</value>
     </property>
 
 </configuration>

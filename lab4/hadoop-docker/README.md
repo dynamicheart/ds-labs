@@ -1,11 +1,11 @@
 ### Deployment Design
 
-|Hostname    |Yarn           |HDFS    |
-|------------|---------------|--------|
-|hadoopmaster|ResourceManager|NameNode<br>Secondary NameNode<br>History Server<br>timeline server|
-|hadoopslave1|NodeManager    |DataNode|
-|hadoopslave2|NodeManager    |DataNode|
-|hadoopslave3|NodeManager    |DataNode|
+|Hostname    |Yarn       |HDFS    |
+|------------|-----------|--------|
+|hadoopmaster|ResourceManager<br>History Server<br>timeline server|NameNode<br>Secondary NameNode|
+|hadoopslave1|NodeManager|DataNode|
+|hadoopslave2|NodeManager|DataNode|
+|hadoopslave3|NodeManager|DataNode|
 
 
 ### Startup Sequence
