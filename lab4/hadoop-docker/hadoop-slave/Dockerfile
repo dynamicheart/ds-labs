@@ -9,4 +9,6 @@ RUN mkdir -p /hadoop/dfs/data
 ADD run.sh /run.sh
 RUN chmod a+x /run.sh
 
+EXPOSE 8042
+
 ENTRYPOINT service ssh restart && ./run.sh && bash
