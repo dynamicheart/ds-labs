@@ -1,0 +1,4 @@
+[submodule "DTSS"]
+	path = lab5/DTSS
+	url = https://github.com/dynamicheart/DTSS.git
+	branch = master
